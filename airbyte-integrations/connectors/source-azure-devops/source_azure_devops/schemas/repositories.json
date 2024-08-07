@@ -1,0 +1,52 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "_links": {
+        "type": "object"
+      },
+      "defaultBranch": {
+        "type": "string"
+      },
+      "id": {
+        "type": "string"
+      },
+      "isDisabled": {
+        "type": "boolean"
+      },
+      "isFork": {
+        "type": "boolean"
+      },
+      "isInMaintenance": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "string"
+      },
+      "projectId": {
+        "type": "string"
+      },
+      "remoteUrl": {
+        "type": "string"
+      },
+      "size": {
+        "type": "integer"
+      },
+      "sshUrl": {
+        "type": "string"
+      },
+      "url": {
+        "type": "string"
+      },
+      "validRemoteUrls": {
+        "type": "array",
+        "items": {
+            "type": "number"
+        }
+      },
+      "webUrl": {
+        "type": "string"
+      }
+    }
+  }
+  

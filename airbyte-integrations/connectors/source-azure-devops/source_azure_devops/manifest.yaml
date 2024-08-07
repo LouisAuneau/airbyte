@@ -27,15 +27,42 @@ definitions:
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever"
-  projects:
-    $ref: "#/definitions/base_stream"
-    name: "projects"
-    primary_key: "id"
-    $parameters:
-      path: "/{{ config['organization'] }}/_apis/projects"
+  streams:
+    projects:
+      $ref: "#/definitions/base_stream"
+      name: "projects"
+      primary_key: "id"
+      $parameters:
+        path: "/{{ config['organization'] }}/_apis/projects"
 
+    repositories:
+      type: DeclarativeStream
+      name: "repositories"
+      primary_key: "id"
+      $parameters:
+        path: "/{{ config['organization'] }}/{{ stream_partition.project_name }}/_apis/git/repositories"
+      retriever:
+        $ref: "#/definitions/retriever"
+        partition_router:
+          - type: SubstreamPartitionRouter
+            parent_stream_configs:
+              - type: ParentStreamConfig
+                parent_key: name
+                partition_field: project_name
+                stream:
+                  $ref: '#/definitions/streams/projects'
+      transformations:
+        - type: AddFields
+          fields:
+            - path:
+                - projectId
+              value: '{{ record[''project''][''id''] }}'
+        - type: RemoveFields
+          field_pointers:
+            - [ "project" ]
 streams:
-  - "#/definitions/projects"
+  - "#/definitions/streams/projects"
+  - "#/definitions/streams/repositories"
 
 check:
   type: CheckStream
