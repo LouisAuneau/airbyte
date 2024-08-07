@@ -1,0 +1,66 @@
+version: "0.29.0"
+
+definitions:
+  selector:
+    type: RecordSelector
+    extractor:
+      type: DpathExtractor
+      field_path:
+        - value
+  requester:
+    type: HttpRequester
+    url_base: "https://dev.azure.com/"
+    http_method: "GET"
+    authenticator:
+      type: BasicHttpAuthenticator
+      username: ''
+      password: '{{ config[''personal_access_token''] }}'
+  retriever:
+    type: SimpleRetriever
+    record_selector:
+      $ref: "#/definitions/selector"
+    paginator:
+      type: NoPagination
+    requester:
+      $ref: "#/definitions/requester"
+  base_stream:
+    type: DeclarativeStream
+    retriever:
+      $ref: "#/definitions/retriever"
+  projects:
+    $ref: "#/definitions/base_stream"
+    name: "projects"
+    primary_key: "id"
+    $parameters:
+      path: "/{{ config['organization'] }}/_apis/projects"
+
+streams:
+  - "#/definitions/projects"
+
+check:
+  type: CheckStream
+  stream_names:
+    - "projects"
+
+spec:
+  type: Spec
+  documentation_url: https://docs.airbyte.com/integrations/sources/azure-devops
+  connection_specification:
+    title: Azure Devops Spec
+    type: object
+    required:
+      - personal_access_token
+      - organization
+    additionalProperties: true
+    properties:
+      personal_access_token:
+        type: string
+        description: >-
+          Azure DevOps personal access token (PAT). 
+          See <a href="https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows">documentation</a>.
+        airbyte_secret: true
+      organization:
+        type: string
+        description: >-
+          Azure DevOps organization to pull data from. 
+          See <a href="https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/create-organization?view=azure-devops">documentation</a>.
