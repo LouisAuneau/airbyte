@@ -9,7 +9,6 @@ definitions:
         - value
   requester:
     type: HttpRequester
-    url_base: "https://dev.azure.com/"
     http_method: "GET"
     authenticator:
       type: BasicHttpAuthenticator
@@ -27,19 +26,30 @@ definitions:
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever"
+  
   streams:
     projects:
       $ref: "#/definitions/base_stream"
       name: "projects"
       primary_key: "id"
       $parameters:
+        url_base: "https://dev.azure.com/"
         path: "/{{ config['organization'] }}/_apis/projects"
+  
+    users:
+      $ref: "#/definitions/base_stream"
+      name: "users"
+      primary_key: "id"
+      $parameters:
+        url_base: "https://vssps.dev.azure.com/"
+        path: "/{{ config['organization'] }}/_apis/graph/users"
 
     repositories:
       type: DeclarativeStream
       name: "repositories"
       primary_key: "id"
       $parameters:
+        url_base: "https://dev.azure.com/"
         path: "/{{ config['organization'] }}/{{ stream_partition.project_name }}/_apis/git/repositories"
       retriever:
         $ref: "#/definitions/retriever"
@@ -60,14 +70,18 @@ definitions:
         - type: RemoveFields
           field_pointers:
             - [ "project" ]
+
 streams:
   - "#/definitions/streams/projects"
+  - "#/definitions/streams/users"
   - "#/definitions/streams/repositories"
 
 check:
   type: CheckStream
   stream_names:
     - "projects"
+    - "users"
+    - "repositories"
 
 spec:
   type: Spec
