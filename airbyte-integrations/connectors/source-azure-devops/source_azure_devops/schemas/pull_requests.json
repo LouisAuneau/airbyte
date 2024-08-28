@@ -1,0 +1,73 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "repositoryId": {
+        "type": "string"
+      },
+      "name": {
+        "type": "string"
+      },
+      "pullRequestId": {
+        "type": "integer"
+      },
+      "codeReviewId": {
+        "type": "integer"
+      },
+      "status": {
+        "type": "string"
+      },
+      "createdBy": {
+        "type": "string"
+      },
+      "creationDate": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string"
+      },
+      "sourceRefName": {
+        "type": "string"
+      },
+      "targetRefName": {
+        "type": "string"
+      },
+      "mergeStatus": {
+        "type": "string"
+      },
+      "isDraft": {
+        "type": "boolean"
+      },
+      "mergeId": {
+        "type": "string"
+      },
+      "lastMergeSourceCommit": {
+        "type": "string"
+      },
+      "lastMergeTargetCommit": {
+        "type": "string"
+      },
+      "lastMergeCommit": {
+        "type": "string"
+      },
+      "labels": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "url": {
+        "type": "string"
+      },
+      "completionOptions": {
+        "type": "object"
+      },
+      "supportsIterations": {
+        "type": "boolean"
+      },
+      "autoCompleteSetBy": {
+        "type": "object"
+      }
+    }
+  }
+  

@@ -34,7 +34,7 @@ See `sample_files/sample_config.json` for a sample config file.
 poetry run source-azure-devops spec
 poetry run source-azure-devops check --config secrets/config.json
 poetry run source-azure-devops discover --config secrets/config.json
-poetry run source-azure-devops read --config secrets/config.json --catalog sample_files/configured_catalog.json
+poetry run source-azure-devops read --config secrets/config.json --catalog /configured_catalog.json
 ```
 
 ### Running tests

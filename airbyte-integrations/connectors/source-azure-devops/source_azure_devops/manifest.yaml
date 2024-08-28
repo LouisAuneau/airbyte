@@ -22,6 +22,15 @@ definitions:
       type: NoPagination
     requester:
       $ref: "#/definitions/requester"
+  partition_routers:
+    projects_partition:
+      - type: SubstreamPartitionRouter
+        parent_stream_configs:
+          - type: ParentStreamConfig
+            parent_key: name
+            partition_field: project_name
+            stream:
+              $ref: '#/definitions/streams/projects'
   base_stream:
     type: DeclarativeStream
     retriever:
@@ -39,7 +48,6 @@ definitions:
     users:
       $ref: "#/definitions/base_stream"
       name: "users"
-      primary_key: "id"
       $parameters:
         url_base: "https://vssps.dev.azure.com/"
         path: "/{{ config['organization'] }}/_apis/graph/users"
@@ -54,13 +62,7 @@ definitions:
       retriever:
         $ref: "#/definitions/retriever"
         partition_router:
-          - type: SubstreamPartitionRouter
-            parent_stream_configs:
-              - type: ParentStreamConfig
-                parent_key: name
-                partition_field: project_name
-                stream:
-                  $ref: '#/definitions/streams/projects'
+          $ref: "#/definitions/partition_routers/projects_partition"
       transformations:
         - type: AddFields
           fields:
@@ -71,10 +73,46 @@ definitions:
           field_pointers:
             - [ "project" ]
 
+    pull_requests:
+      $ref: "#/definitions/base_stream"
+      name: "pull_requests"
+      primary_key:
+        - repositoryId
+        - pullRequestId
+      $parameters:
+        url_base: "https://dev.azure.com/"
+        path: "/{{ config['organization'] }}/{{ stream_partition.project_name }}/_apis/git/pullrequests"
+      retriever:
+        $ref: "#/definitions/retriever"
+        partition_router:
+          $ref: "#/definitions/partition_routers/projects_partition"
+      transformations:
+        - type: AddFields
+          fields:
+            - path: [ "repositoryId" ]
+              value: '{{ record.repository.id }}'
+            - path: [ "createdBy" ]
+              value: '{{ record.createdBy.uniqueName }}'
+            - path: [ "labels" ]
+              value: '{{ record.labels|map(attribute="name")|list }}'
+            - path: [ "lastMergeSourceCommit" ]
+              value: '{{ record.get("lastMergeSourceCommit", {}).get("commitId", None) }}'
+            - path: [ "lastMergeTargetCommit" ]
+              value: '{{ record.get("lastMergeTargetCommit", {}).get("commitId", None) }}'
+            - path: [ "lastMergeCommit" ]
+              value: '{{ record.get("lastMergeCommit", {}).get("commitId", None) }}'
+        - type: RemoveFields
+          field_pointers:
+            - [ "repository" ]
+            - [ "reviewers" ]
+
+
+
 streams:
   - "#/definitions/streams/projects"
   - "#/definitions/streams/users"
   - "#/definitions/streams/repositories"
+  - "#/definitions/streams/pull_requests"
 
 check:
   type: CheckStream
