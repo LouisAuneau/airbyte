@@ -48,7 +48,7 @@ definitions:
         inject_into: "request_parameter"
         field_name: "$top"
       pagination_strategy:
-        type: "PageIncrement"
+        type: "OffsetIncrement"
         page_size: 100
       page_token_option:
         type: "RequestOption"
