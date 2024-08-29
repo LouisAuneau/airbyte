@@ -31,6 +31,29 @@ definitions:
             partition_field: project_name
             stream:
               $ref: '#/definitions/streams/projects'
+  paginators:
+    continuation_token:
+      type: "DefaultPaginator"
+      pagination_strategy:
+        type: "CursorPagination"
+        cursor_value: "{{ headers['X-MS-ContinuationToken'] }}"
+      page_token_option:
+        type: "RequestPath"
+        field_name: "continuationToken"
+        inject_into: "request_parameter"
+    top_skip:
+      type: "DefaultPaginator"
+      page_size_option:
+        type: "RequestOption"
+        inject_into: "request_parameter"
+        field_name: "$top"
+      pagination_strategy:
+        type: "PageIncrement"
+        page_size: 100
+      page_token_option:
+        type: "RequestOption"
+        inject_into: "request_parameter"
+        field_name: "$skip"
   base_stream:
     type: DeclarativeStream
     retriever:
@@ -44,6 +67,10 @@ definitions:
       $parameters:
         url_base: "https://dev.azure.com/"
         path: "/{{ config['organization'] }}/_apis/projects"
+      retriever:
+        $ref: "#/definitions/retriever"
+        paginator:
+          $ref: "#/definitions/paginators/continuation_token"
   
     users:
       $ref: "#/definitions/base_stream"
@@ -51,6 +78,10 @@ definitions:
       $parameters:
         url_base: "https://vssps.dev.azure.com/"
         path: "/{{ config['organization'] }}/_apis/graph/users"
+      retriever:
+        $ref: "#/definitions/retriever"
+        paginator:
+          $ref: "#/definitions/paginators/continuation_token"
 
     repositories:
       type: DeclarativeStream
@@ -86,6 +117,8 @@ definitions:
         $ref: "#/definitions/retriever"
         partition_router:
           $ref: "#/definitions/partition_routers/projects_partition"
+        paginator:
+          $ref: "#/definitions/paginators/top_skip"
       transformations:
         - type: AddFields
           fields:
