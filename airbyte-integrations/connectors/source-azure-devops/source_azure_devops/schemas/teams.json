@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": ["string"]
+    },
+    "name": {
+      "type": ["string"]
+    },
+    "url": {
+      "type": ["string"]
+    },
+    "description": {
+      "type": ["string"]
+    },
+    "identityUrl": {
+      "type": ["string"]
+    },
+    "projectName": {
+      "type": ["string"]
+    },
+    "projectId": {
+      "type": ["string"]
+    }
+  }
+}
