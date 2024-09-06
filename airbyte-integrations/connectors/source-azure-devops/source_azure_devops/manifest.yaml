@@ -160,6 +160,31 @@ definitions:
             - [ "repository" ]
             - [ "reviewers" ]
 
+    boards:
+      $ref: "#/definitions/base_stream"
+      name: "boards"
+      $parameters:
+        url_base: "https://dev.azure.com/"
+        path: "/{{ config['organization'] }}/{{ stream_partition.project_name }}/{{ stream_partition.team_name }}/_apis/work/boards"
+      primary_key:
+        - id
+      retriever:
+        $ref: "#/definitions/retriever"
+        partition_router:
+          type: CustomPartitionRouter
+          class_name: source_azure_devops.partition_routers.ProjectsNestedPartitionRouter
+          parent_stream_configs:
+            - type: ParentStreamConfig
+              parent_key: "name"
+              stream: "#/definitions/streams/teams"
+              partition_field: "team_name"
+      transformations:
+        - type: AddFields
+          fields:
+            - path: [ "teamName" ]
+              value: "{{ stream_partition.team_name }}"
+            - path: [ "projectName" ]
+              value: "{{ stream_partition.project_name }}"
 
 streams:
   - "#/definitions/streams/projects"
@@ -167,6 +192,7 @@ streams:
   - "#/definitions/streams/teams"
   - "#/definitions/streams/repositories"
   - "#/definitions/streams/pull_requests"
+  - "#/definitions/streams/boards"
 
 check:
   type: CheckStream
