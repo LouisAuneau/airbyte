@@ -1,7 +1,7 @@
 version: "0.29.0"
 
 definitions:
-  # Shared definitions for all streams
+  # -- Shared definitions for all streams
   selector:
     type: RecordSelector
     extractor:
@@ -11,10 +11,13 @@ definitions:
   requester:
     type: HttpRequester
     http_method: "GET"
+    url_base: https://dev.azure.com/
     authenticator:
       type: BasicHttpAuthenticator
       username: ''
       password: '{{ config[''personal_access_token''] }}'
+    request_parameters:
+        api-version: '7.0'
   retriever:
     type: SimpleRetriever
     record_selector:
@@ -31,68 +34,74 @@ definitions:
             parent_key: name
             partition_field: project_name
             stream:
-              $ref: '#/definitions/streams/projects'
+              $ref: "#/definitions/streams/projects"
   paginators:
     continuation_token:
-      type: "DefaultPaginator"
+      type: DefaultPaginator
       pagination_strategy:
-        type: "CursorPagination"
+        type: CursorPagination
         cursor_value: "{{ headers['X-MS-ContinuationToken'] }}"
       page_token_option:
-        type: "RequestPath"
-        field_name: "continuationToken"
-        inject_into: "request_parameter"
+        type: RequestPath
+        field_name: continuationToken
+        inject_into: request_parameter
     top_skip:
-      type: "DefaultPaginator"
+      type: DefaultPaginator
       page_size_option:
-        type: "RequestOption"
-        inject_into: "request_parameter"
-        field_name: "$top"
+        type: RequestOption
+        inject_into: request_parameter
+        field_name: $top
       pagination_strategy:
-        type: "OffsetIncrement"
+        type: OffsetIncrement
         page_size: 100
       page_token_option:
-        type: "RequestOption"
-        inject_into: "request_parameter"
-        field_name: "$skip"
-
+        type: RequestOption
+        inject_into: request_parameter
+        field_name: $skip
   base_stream:
     type: DeclarativeStream
     retriever:
       $ref: "#/definitions/retriever"
-  
 
-  # Streams definitions
+  # -- Streams definitions
   streams:
+
+    # [Projects](https://learn.microsoft.com/en-us/rest/api/azure/devops/core/projects/list)
     projects:
       $ref: "#/definitions/base_stream"
-      name: "projects"
-      primary_key: "id"
+      name: projects
+      primary_key: 
+        - id
       $parameters:
-        url_base: "https://dev.azure.com/"
-        path: "/{{ config['organization'] }}/_apis/projects"
+        path: /{{ config.organization }}/_apis/projects
       retriever:
         $ref: "#/definitions/retriever"
         paginator:
           $ref: "#/definitions/paginators/continuation_token"
   
+    # [Users](https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/users/list)
+    # This stream uses another API that has a different hostname and api-version.
     users:
       $ref: "#/definitions/base_stream"
-      name: "users"
+      name: users
       $parameters:
-        url_base: "https://vssps.dev.azure.com/"
-        path: "/{{ config['organization'] }}/_apis/graph/users"
+        path: /{{ config.organization }}/_apis/graph/users
       retriever:
         $ref: "#/definitions/retriever"
         paginator:
           $ref: "#/definitions/paginators/continuation_token"
+        requester:
+          $ref: "#/definitions/requester"
+          url_base: https://vssps.dev.azure.com/
+          request_parameters:
+            api-version: 7.0-preview
 
+    # [Teams](https://learn.microsoft.com/en-us/rest/api/azure/devops/core/teams/get-teams)
     teams:
       $ref: "#/definitions/base_stream"
-      name: "teams"
+      name: teams
       $parameters:
-        url_base: "https://dev.azure.com/"
-        path: "/{{ config['organization'] }}/_apis/projects//{{ stream_partition.project_name }}/teams"
+        path: /{{ config.organization }}/_apis/projects//{{ stream_partition.project_name }}/teams
       retriever:
         $ref: "#/definitions/retriever"
         partition_router:
@@ -100,13 +109,14 @@ definitions:
         paginator:
           $ref: "#/definitions/paginators/top_skip"
 
+    # [Repositories](https://learn.microsoft.com/en-us/rest/api/azure/devops/git/repositories/list)
     repositories:
       type: DeclarativeStream
-      name: "repositories"
-      primary_key: "id"
+      name: repositories
+      primary_key: 
+        - id
       $parameters:
-        url_base: "https://dev.azure.com/"
-        path: "/{{ config['organization'] }}/{{ stream_partition.project_name }}/_apis/git/repositories"
+        path: /{{ config.organization }}/{{ stream_partition.project_name }}/_apis/git/repositories
       retriever:
         $ref: "#/definitions/retriever"
         partition_router:
@@ -116,20 +126,20 @@ definitions:
           fields:
             - path:
                 - projectId
-              value: '{{ record.project.id }}'
+              value: "{{ record.project.id }}"
         - type: RemoveFields
           field_pointers:
             - [ "project" ]
 
+    # [Pull Requests](https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pull-requests/get-pull-requests-by-project)
     pull_requests:
       $ref: "#/definitions/base_stream"
-      name: "pull_requests"
+      name: pull_requests
       primary_key:
         - repositoryId
         - pullRequestId
       $parameters:
-        url_base: "https://dev.azure.com/"
-        path: "/{{ config['organization'] }}/{{ stream_partition.project_name }}/_apis/git/pullrequests"
+        path: /{{ config.organization }}/{{ stream_partition.project_name }}/_apis/git/pullrequests
       retriever:
         $ref: "#/definitions/retriever"
         partition_router:
@@ -143,29 +153,30 @@ definitions:
       transformations:
         - type: AddFields
           fields:
-            - path: [ "repositoryId" ]
+            - path: [ repositoryId ]
               value: '{{ record.repository.id }}'
-            - path: [ "createdBy" ]
+            - path: [ createdBy ]
               value: '{{ record.createdBy.uniqueName }}'
             - path: [ "labels" ]
               value: '{{ record.labels|map(attribute="name")|list }}'
-            - path: [ "lastMergeSourceCommit" ]
+            - path: [ lastMergeSourceCommit ]
               value: '{{ record.get("lastMergeSourceCommit", {}).get("commitId", None) }}'
-            - path: [ "lastMergeTargetCommit" ]
+            - path: [ lastMergeTargetCommit ]
               value: '{{ record.get("lastMergeTargetCommit", {}).get("commitId", None) }}'
-            - path: [ "lastMergeCommit" ]
+            - path: [ lastMergeCommit ]
               value: '{{ record.get("lastMergeCommit", {}).get("commitId", None) }}'
         - type: RemoveFields
           field_pointers:
-            - [ "repository" ]
-            - [ "reviewers" ]
+            - [ repository ]
+            - [ reviewers ]
 
+    # [Boards](https://learn.microsoft.com/en-us/rest/api/azure/devops/work/boards/list)
+    # This streams uses a custom partition to partition both by project & team names
     boards:
       $ref: "#/definitions/base_stream"
-      name: "boards"
+      name: boards
       $parameters:
-        url_base: "https://dev.azure.com/"
-        path: "/{{ config['organization'] }}/{{ stream_partition.project_name }}/{{ stream_partition.team_name }}/_apis/work/boards"
+        path: /{{ config.organization }}/{{ stream_partition.project_name }}/{{ stream_partition.team_name }}/_apis/work/boards
       primary_key:
         - id
       retriever:
@@ -175,15 +186,15 @@ definitions:
           class_name: source_azure_devops.partition_routers.ProjectsNestedPartitionRouter
           parent_stream_configs:
             - type: ParentStreamConfig
-              parent_key: "name"
+              parent_key: name
               stream: "#/definitions/streams/teams"
-              partition_field: "team_name"
+              partition_field: team_name
       transformations:
         - type: AddFields
           fields:
-            - path: [ "teamName" ]
+            - path: [ teamName ]
               value: "{{ stream_partition.team_name }}"
-            - path: [ "projectName" ]
+            - path: [ projectName ]
               value: "{{ stream_partition.project_name }}"
 
 streams:
