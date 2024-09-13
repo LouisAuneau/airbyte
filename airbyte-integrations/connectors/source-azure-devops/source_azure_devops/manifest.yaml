@@ -10,14 +10,14 @@ definitions:
         - value
   requester:
     type: HttpRequester
-    http_method: "GET"
+    http_method: GET
     url_base: https://dev.azure.com/
     authenticator:
       type: BasicHttpAuthenticator
-      username: ''
-      password: '{{ config[''personal_access_token''] }}'
+      username: ""
+      password: "{{ config.personal_access_token }}"
     request_parameters:
-        api-version: '7.0'
+        api-version: "7.0"
   retriever:
     type: SimpleRetriever
     record_selector:
@@ -197,6 +197,44 @@ definitions:
             - path: [ projectName ]
               value: "{{ stream_partition.project_name }}"
 
+    # [Work Items](https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/work-items/get-work-item)
+    # This stream uses a substream to list work items using a [WIQL](https://learn.microsoft.com/en-us/azure/devops/boards/queries/wiql-syntax)
+    # query using a [WIQL endpoint](https://learn.microsoft.com/en-us/rest/api/azure/devops/wit/wiql/query-by-wiql). 
+    # The list of work items is then use to get each work item individually.
+    __work_items_list:  
+      $ref: "#/definitions/base_stream"
+      name: "work_items"
+      primary_key: 
+        - id
+      $parameters:
+        path: "/{{ config['organization'] }}/_apis/wit/wiql"
+      retriever:
+        $ref: "#/definitions/retriever"
+        requester:
+          $ref: "#/definitions/requester"
+          http_method: POST
+          request_body_json:
+            query: "Select [System.Id] From WorkItems Where [System.ChangedDate] >= '{{stream_slice['start_time']}}' And [System.ChangedDate] <= '{{stream_slice['end_time']}}'"
+        record_selector:
+          type: RecordSelector
+          extractor:
+            type: DpathExtractor
+            field_path:
+              - workItems
+      incremental_sync:
+        type: "DatetimeBasedCursor"
+        start_datetime:
+          datetime: "{{ format_datetime(config['start_date'], '%Y-%m-%d') }}"
+        end_datetime:
+          datetime: "{{ now_utc().strftime('%Y-%m-%d') }}"
+        datetime_format: "%Y-%m-%d"
+        cursor_datetime_formats:
+          - "%Y-%m-%d"
+          - "%Y-%m-%dT%H:%M:%S"
+        cursor_granularity: P1D
+        step: P2D
+        cursor_field: updated_at
+
 streams:
   - "#/definitions/streams/projects"
   - "#/definitions/streams/users"
@@ -204,6 +242,7 @@ streams:
   - "#/definitions/streams/repositories"
   - "#/definitions/streams/pull_requests"
   - "#/definitions/streams/boards"
+  - "#/definitions/streams/__work_items_list"
 
 check:
   type: CheckStream
