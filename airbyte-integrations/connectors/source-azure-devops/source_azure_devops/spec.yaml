@@ -1,0 +1,20 @@
+documentationUrl: https://docsurl.com
+connectionSpecification:
+  $schema: http://json-schema.org/draft-07/schema#
+  title: Azure Devops Spec
+  type: object
+  required:
+    - personal_access_token
+    - organization
+  properties:
+    personal_access_token:
+      type: string
+      title: Personal Access Token
+      description: >-
+        Azure DevOps Personal Access Token (PAT) used to retrieve data.
+        More information is available in the <a href="https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate">documentation</a>.
+    organization:
+      type: string
+      title: Organization
+      description: >-
+        Azure DevOps organization to pull data from.
