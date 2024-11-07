@@ -5,7 +5,7 @@ from airbyte_cdk.sources import AbstractSource
 from airbyte_cdk.sources.streams import Stream
 from airbyte_cdk.sources.streams.http.requests_native_auth import BasicHttpAuthenticator
 
-from source_azure_devops.streams import Projects, Repositories, Users
+from source_azure_devops.streams import Projects, Repositories, Teams, Users
 
 
 class SourceAzureDevops(AbstractSource):
@@ -37,10 +37,12 @@ class SourceAzureDevops(AbstractSource):
 
         project_stream = Projects(config=config, authenticator=auth)
         users_stream = Users(config=config, authenticator=auth)
+        teams_stream = Teams(config=config, authenticator=auth)
         repositories_stream = Repositories(parent=project_stream, config=config, authenticator=auth)
 
         return [
             project_stream,
+            repositories_stream,
+            teams_stream,
             users_stream,
-            repositories_stream
         ]
