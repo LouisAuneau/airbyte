@@ -5,6 +5,8 @@ from airbyte_cdk.sources.streams.http.auth.core import HttpAuthenticator
 import requests
 from typing import Any, Iterable, Mapping, MutableMapping, Optional
 
+from source_azure_devops.streams.paginators import AzureDevOpsPaginator
+
 class AzureDevopsStream(HttpStream, ABC):
     """
     TODO remove this comment
@@ -34,6 +36,10 @@ class AzureDevopsStream(HttpStream, ABC):
     api_version: str = "7.1"
     subdomain: Optional[str] = None  # Some endpoints are part of subdomains, e.g: https://vssps.dev.azure.com/
     url_base: str = None
+    paginator: Optional[AzureDevOpsPaginator] = None
+
+    _PAGE_SIZE: int = 1000
+    _PAGE_ITERATOR: int = 0
 
     def __init__(self, config: Mapping[str, Any], authenticator: HttpAuthenticator, api_budget = None):
         if self.subdomain is None:
@@ -42,49 +48,39 @@ class AzureDevopsStream(HttpStream, ABC):
             self.url_base = f"https://{self.subdomain}.dev.azure.com/{config['organization']}/"
         super().__init__(authenticator=authenticator, api_budget=api_budget)
 
-    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
-        return None
-
     def request_params(
         self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
     ) -> MutableMapping[str, Any]:
-        return {
+        params = {
             "api-version": self.api_version
         }
+
+        if self.paginator == AzureDevOpsPaginator.TOP_SKIP:
+            params["$top"] = self._PAGE_SIZE
+            params["$skip"] = next_page_token.get('skip') if next_page_token else 0
+
+        return params
+
+    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
+        if self.paginator == AzureDevOpsPaginator.TOP_SKIP:
+            if response.json().get('count', 0) > 0:
+                self._PAGE_ITERATOR += self._PAGE_SIZE
+                return {'skip': self._PAGE_ITERATOR}
+            
+        return None
 
     def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
         yield from response.json().get('value', [])
 
-class AzureDevopsSubStream(HttpSubStream, ABC):
+class AzureDevopsSubStream(AzureDevopsStream, ABC):
 
     api_version: str = "7.1"
     subdomain: Optional[str] = None  # Some endpoints are part of subdomains, e.g: https://vssps.dev.azure.com/
     url_base: str = None
 
     def __init__(self, parent: AzureDevopsStream, config: Mapping[str, Any], authenticator = None, api_budget = None):
-        if self.subdomain is None:
-            self.url_base = f"https://dev.azure.com/{config['organization']}/"
-        else:
-            self.url_base = f"https://{self.subdomain}.dev.azure.com/{config['organization']}/"
-        super().__init__(parent=parent, authenticator=authenticator, api_budget=api_budget)
-
-    def next_page_token(self, response: requests.Response) -> Optional[Mapping[str, Any]]:
-        return None
-
-    def request_params(
-        self, stream_state: Mapping[str, Any], stream_slice: Mapping[str, any] = None, next_page_token: Mapping[str, Any] = None
-    ) -> MutableMapping[str, Any]:
-        return {
-            "api-version": self.api_version
-        }
-
-    def parse_response(self, response: requests.Response, **kwargs) -> Iterable[Mapping]:
-        yield from response.json().get('value', [])
-
-    def stream_slices(self, sync_mode, cursor_field = None, stream_state = None):
-        return super().stream_slices(sync_mode, cursor_field, stream_state)
-
-
+        self.parent = parent
+        super().__init__(config=config, authenticator=authenticator, api_budget=api_budget)
 
 # Basic incremental stream
 class IncrementalAzureDevopsStream(AzureDevopsStream, ABC):
