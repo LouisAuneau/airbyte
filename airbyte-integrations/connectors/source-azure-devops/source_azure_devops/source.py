@@ -8,6 +8,7 @@ from airbyte_cdk.sources.streams.http.requests_native_auth import BasicHttpAuthe
 from source_azure_devops.streams import (
     Boards,
     Projects,
+    PullRequests,
     Repositories,
     Teams,
     Users
@@ -46,10 +47,12 @@ class SourceAzureDevops(AbstractSource):
         teams_stream = Teams(config=config, authenticator=auth)
         boards_stream = Boards(parent=teams_stream, config=config, authenticator=auth)
         repositories_stream = Repositories(parent=project_stream, config=config, authenticator=auth)
+        pull_requests_stream = PullRequests(parent=repositories_stream, config=config, authenticator=auth)
 
         return [
             boards_stream,
             project_stream,
+            pull_requests_stream,
             repositories_stream,
             teams_stream,
             users_stream,
