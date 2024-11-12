@@ -8,7 +8,7 @@ class Users(AzureDevopsStream):
     Documentation: https://learn.microsoft.com/en-us/rest/api/azure/devops/graph/users/list
     """
 
-    primary_key = "mailAddress"
+    primary_key = "descriptor"
     api_version = "7.1-preview.1"
     subdomain = "vssps"
 
