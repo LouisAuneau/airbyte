@@ -2,33 +2,12 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-      "id": {
-        "type": "string",
-        "format": "uuid"
-      },
-      "name": {
-        "type": "string"
-      },
-      "url": {
-        "type": "string",
-        "format": "uri"
-      },
       "defaultBranch": {
         "type": "string"
       },
-      "size": {
-        "type": "integer"
-      },
-      "remoteUrl": {
+      "id": {
         "type": "string",
-        "format": "uri"
-      },
-      "sshUrl": {
-        "type": "string"
-      },
-      "webUrl": {
-        "type": "string",
-        "format": "uri"
+        "format": "uuid"
       },
       "isDisabled": {
         "type": "boolean"
@@ -36,9 +15,30 @@
       "isInMaintenance": {
         "type": "boolean"
       },
+      "name": {
+        "type": "string"
+      },
       "projectId": {
         "type": "string",
         "format": "uuid"
+      },
+      "remoteUrl": {
+        "type": "string",
+        "format": "uri"
+      },
+      "size": {
+        "type": "integer"
+      },
+      "sshUrl": {
+        "type": "string"
+      },
+      "url": {
+        "type": "string",
+        "format": "uri"
+      },
+      "webUrl": {
+        "type": "string",
+        "format": "uri"
       }
     }
   }

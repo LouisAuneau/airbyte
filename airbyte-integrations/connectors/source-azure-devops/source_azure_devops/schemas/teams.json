@@ -2,30 +2,30 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
+      "description": {
+        "type": "string"
+      },
       "id": {
         "type": "string",
         "format": "uuid"
-      },
-      "name": {
-        "type": "string"
-      },
-      "url": {
-        "type": "string",
-        "format": "uri"
-      },
-      "description": {
-        "type": "string"
       },
       "identityUrl": {
         "type": "string",
         "format": "uri"
       },
-      "projectName": {
+      "name": {
         "type": "string"
       },
       "projectId": {
         "type": "string",
         "format": "uuid"
+      },
+      "projectName": {
+        "type": "string"
+      },
+      "url": {
+        "type": "string",
+        "format": "uri"
       }
     }
   }

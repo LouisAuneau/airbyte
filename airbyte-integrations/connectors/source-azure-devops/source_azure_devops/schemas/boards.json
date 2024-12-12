@@ -9,10 +9,6 @@
       "name": {
         "type": "string"
       },
-      "url": {
-        "type": "string",
-        "format": "uri"
-      },
       "projectId": {
         "type": "string",
         "format": "uuid"
@@ -20,6 +16,10 @@
       "teamId": {
         "type": "string",
         "format": "uuid"
+      },
+      "url": {
+        "type": "string",
+        "format": "uri"
       }
     }
   }

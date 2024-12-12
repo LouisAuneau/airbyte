@@ -2,17 +2,20 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-      "repositoryId": {
-        "type": "string"
-      },
-      "pullRequestId": {
-        "type": "integer"
+      "closedDate": {
+        "type": ["string", "null"],
+        "format": "date-time",
+        "airbyte_type": "timestamp_without_timezone"
       },
       "codeReviewId": {
         "type": "integer"
       },
-      "status": {
-        "type": "string"
+      "completionOptions": {
+        "type": "object"
+      },
+      "completionQueueTime": {
+        "type": "string",
+        "format": "date-time"
       },
       "createdBy": {
         "type": "string"
@@ -21,27 +24,31 @@
         "type": "string",
         "format": "date-time"
       },
-      "closedDate": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "title": {
-        "type": "string"
-      },
-      "sourceRefName": {
-        "type": "string"
-      },
-      "targetRefName": {
-        "type": "string"
-      },
-      "mergeStatus": {
+      "description": {
         "type": "string"
       },
       "isDraft": {
         "type": "boolean"
       },
-      "mergeId": {
-        "type": "string"
+      "labels": {
+        "type": ["array", "null"],
+        "items": {
+          "type": "object",
+          "properties": {
+            "active": {
+              "type": "boolean"
+            },
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "lastMergeCommit": {
+        "type": ["string", "null"]
       },
       "lastMergeSourceCommit": {
         "type": "string"
@@ -49,7 +56,16 @@
       "lastMergeTargetCommit": {
         "type": "string"
       },
-      "lastMergeCommit": {
+      "mergeId": {
+        "type": "string"
+      },
+      "mergeStatus": {
+        "type": "string"
+      },
+      "pullRequestId": {
+        "type": "integer"
+      },
+      "repositoryId": {
         "type": "string"
       },
       "reviewers": {
@@ -58,18 +74,23 @@
           "type": "object"
         }
       },
-      "url": {
+      "sourceRefName": {
         "type": "string"
       },
-      "completionOptions": {
-        "type": "object"
+      "status": {
+        "type": "string"
       },
       "supportsIterations": {
         "type": "boolean"
       },
-      "completionQueueTime": {
-        "type": "string",
-        "format": "date-time"
+      "targetRefName": {
+        "type": "string"
+      },
+      "title": {
+        "type": "string"
+      },
+      "url": {
+        "type": "string"
       }
     }
   }

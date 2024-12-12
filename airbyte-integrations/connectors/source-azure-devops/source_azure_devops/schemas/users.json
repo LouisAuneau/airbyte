@@ -2,13 +2,16 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-      "subjectKind": {
+      "_links": {
+        "type": "object"
+      },
+      "descriptor": {
+        "type": "string"
+      },
+      "displayName": {
         "type": "string"
       },
       "domain": {
-        "type": "string"
-      },
-      "principalName": {
         "type": "string"
       },
       "mailAddress": {
@@ -18,19 +21,17 @@
         "type": "string"
       },
       "originId": {
-        "type": "boolean"
-      },
-      "displayName": {
         "type": "string"
       },
-      "_links": {
-        "type": "object"
+      "principalName": {
+        "type": "string"
+      },
+      "subjectKind": {
+        "type": "string"
       },
       "url": {
-        "type": "string"
-      },
-      "descriptor": {
-        "type": "string"
+        "type": "string",
+        "format": "uri"
       }
     }
   }
