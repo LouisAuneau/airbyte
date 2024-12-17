@@ -3,9 +3,9 @@
     "type": "object",
     "properties": {
       "closedDate": {
-        "type": ["string", "null"],
+        "type": ["null", "string"],
         "format": "date-time",
-        "airbyte_type": "timestamp_without_timezone"
+        "airbyte_type": "timestamp_with_timezone"
       },
       "codeReviewId": {
         "type": "integer"
@@ -15,14 +15,16 @@
       },
       "completionQueueTime": {
         "type": "string",
-        "format": "date-time"
+        "format": "date-time",
+        "airbyte_type": "timestamp_with_timezone"
       },
       "createdBy": {
         "type": "string"
       },
       "creationDate": {
         "type": "string",
-        "format": "date-time"
+        "format": "date-time",
+        "airbyte_type": "timestamp_with_timezone"
       },
       "description": {
         "type": "string"
