@@ -11,7 +11,8 @@ from source_azure_devops.streams import (
     PullRequests,
     Repositories,
     Teams,
-    Users
+    Users,
+    WorkItems
 )
 
 
@@ -48,6 +49,7 @@ class SourceAzureDevops(AbstractSource):
         boards_stream = Boards(parent=teams_stream, config=config, authenticator=auth)
         repositories_stream = Repositories(parent=project_stream, config=config, authenticator=auth)
         pull_requests_stream = PullRequests(parent=repositories_stream, config=config, authenticator=auth)
+        work_items_stream = WorkItems(config=config, authenticator=auth)
 
         return [
             boards_stream,
@@ -56,4 +58,5 @@ class SourceAzureDevops(AbstractSource):
             repositories_stream,
             teams_stream,
             users_stream,
+            work_items_stream
         ]

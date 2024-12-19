@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "fields": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "System.AreaPath": {
+          "type": "string"
+        },
+        "System.AssignedTo": {
+          "type": ["null", "string"]
+        },
+        "System.BoardColumn": {
+          "type": ["null", "string"]
+        },
+        "System.BoardColumnDone": {
+          "type": ["null", "boolean"]
+        },
+        "System.ChangedDate": {
+          "type": "string",
+          "format": "date-time",
+          "airbyte_type": "timestamp_with_timezone"
+        },
+        "System.ChangedBy": {
+          "type": "string"
+        },
+        "System.CommentCount": {
+          "type": "integer"
+        },
+        "System.CreatedBy": {
+          "type": "string"
+        },
+        "System.CreatedDate": {
+          "type": "string",
+          "format": "date-time",
+          "airbyte_type": "timestamp_with_timezone"
+        },
+        "System.Id": {
+          "type": "integer"
+        },
+        "System.IterationPath": {
+          "type": "string"
+        },
+        "System.Reason": {
+          "type": ["null", "string"]
+        },
+        "System.State": {
+          "type": "string"
+        },
+        "System.Tags": {
+          "type": ["null", "array"],
+          "items": {
+            "type": "string"
+          }
+        },
+        "System.TeamProject": {
+          "type": "string"
+        },
+        "System.Title": {
+          "type": "string"
+        },
+        "System.WorkItemType": {
+          "type": "string"
+        }
+      }
+    },
+    "id": {
+      "type": "integer"
+    },
+    "rev": {
+      "type": "integer"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "airbyte_type": "timestamp_with_timezone"
+    },
+    "url": {
+      "type": "string",
+      "format": "uri"
+    }
+  }
+}
