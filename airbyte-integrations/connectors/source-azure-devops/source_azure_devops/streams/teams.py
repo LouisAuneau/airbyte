@@ -14,3 +14,10 @@ class Teams(AzureDevopsStream):
     
     def path(self, *, stream_state = None, stream_slice = None, next_page_token = None):
         return "_apis/teams"
+    
+    @property
+    def use_cache(self) -> bool:
+        """
+        Cached to be used by substreams
+        """
+        return True

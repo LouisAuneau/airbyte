@@ -2,8 +2,6 @@ from typing import Iterable, List, Mapping, Any
 from airbyte_cdk.utils.traced_exception import AirbyteTracedException, FailureType
 from airbyte_cdk.sources.streams import IncrementalMixin
 from source_azure_devops.streams.azure_devops_stream import AzureDevopsStream
-from source_azure_devops.utils import normalize_field
-
 
 class WorkItems(AzureDevopsStream, IncrementalMixin):
     """
