@@ -1,4 +1,5 @@
 import logging
+import requests
 from typing import Any, List, Mapping, MutableMapping, Tuple
 
 from airbyte_cdk.sources import AbstractSource
@@ -23,16 +24,27 @@ class SourceAzureDevops(AbstractSource):
 
     def check_connection(self, logger: logging.Logger, config: MutableMapping[str, Any]) -> Tuple[bool, any]:
         """
-        TODO: Implement a connection check to validate that the user-provided config can be used to connect to the underlying API
-
-        See https://github.com/airbytehq/airbyte/blob/master/airbyte-integrations/connectors/source-stripe/source_stripe/source.py#L232
-        for an example.
+        Connection check to validate that the user-provided config can be used to connect to Azure DevOps API
 
         :param config:  the user-input config object conforming to the connector's spec.yaml
         :param logger:  logger object
         :return Tuple[bool, any]: (True, None) if the input config can be used to connect to the API successfully, (False, error) otherwise.
         """
-        return True, None
+        res = requests.get(
+            url=f"https://dev.azure.com/{config['organization']}/_apis/projects", 
+            auth=BasicHttpAuthenticator(username="", password=config["personal_access_token"]), 
+            timeout=10,
+            allow_redirects=False
+        )
+        if res.status_code == 200:
+            return True, None
+        elif res.status_code == 302 and "vssps.visualstudio.com/_signin" in res.headers.get("Location", ""):
+            return False, "Unauthorized: Personal Access Token is invalid."
+        elif res.status_code == 401:
+            return False, f"Unauthorized: Unauthorized Personal Access Token for organization `{config['organization']}`."
+        elif res.status_code == 404:
+            return False, f"Not Found: Organization `{config['organization']}` not found."
+        return False, f"Unexpected error: Failed with status code {res.status_code} and message {res.text}"
 
     def streams(self, config: Mapping[str, Any]) -> List[Stream]:
         """
