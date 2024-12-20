@@ -2,8 +2,7 @@ from typing import Any, Iterable, List, Mapping, Optional
 from airbyte_cdk.models import SyncMode
 import requests
 
-from source_azure_devops.streams.azure_devops_stream import AzureDevopsStream, AzureDevopsSubStream
-from source_azure_devops.streams.paginators import AzureDevOpsPaginator
+from source_azure_devops.streams.azure_devops_stream import AzureDevopsSubStream
 
 class Boards(AzureDevopsSubStream):
     """

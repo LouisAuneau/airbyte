@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "color": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "alwaysRequired": {
+            "type": "boolean"
+          },
+          "helpText": {
+            "type": ["null", "string"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "referenceName": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "fieldInstances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "alwaysRequired": {
+            "type": "boolean"
+          },
+          "helpText": {
+            "type": ["null", "string"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "referenceName": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "icon": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "isDisabled": {
+      "type": "boolean"
+    },
+    "name": {
+      "type": "string"
+    },
+    "referenceName": {
+      "type": "string"
+    },
+    "transitions": {
+      "type": "object"
+    },
+    "url": {
+      "type": "string"
+    },
+    "xmlForm": {
+      "type": "string"
+    }
+  }
+}
